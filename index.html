@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おじさん構文メーカー</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background-color: #f5f5f5; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:disabled { background-color: #ccc; }
+        #output { margin-top: 20px; padding: 15px; background: #fff3f3; border-left: 5px solid #ff6b6b; border-radius: 4px; white-space: pre-wrap; display: none; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>おじさん構文メーカー</h2>
+        
+        <div class="form-group">
+            <label for="userName">相手の名前</label>
+            <input type="text" id="userName" placeholder="例：早苗">
+        </div>
+
+        <div class="form-group">
+            <label for="topic">トピック・話したいこと</label>
+            <input type="text" id="topic" placeholder="例：ランチのお誘い">
+        </div>
+
+        <button id="generateBtn">生成</button>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        const userNameInput = document.getElementById('userName');
+        const topicInput = document.getElementById('topic');
+        const generateBtn = document.getElementById('generateBtn');
+        const outputDiv = document.getElementById('output');
+
+        generateBtn.addEventListener('click', async () => {
+            const userName = userNameInput.value.trim();
+            const topic = topicInput.value.trim();
+
+            if (!userName || !topic) {
+                alert('名前とトピックの両方を入力してネ❗');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            outputDiv.style.display = 'block';
+            outputDiv.innerText = '文章を考えてるヨ…🤔';
+
+            try {
+                // 自作する裏方API（/api/convert）にデータを安全に送信
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: userName, topic: topic })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    outputDiv.innerText = data.result;
+                } else {
+                    outputDiv.innerText = 'エラーが発生しちゃったカナ？：' + data.error;
+                }
+            } catch (error) {
+                outputDiv.innerText = '通信エラーだヨ😭：' + error.message;
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
