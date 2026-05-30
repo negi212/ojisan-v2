@@ -100,11 +100,11 @@
                 await navigator.clipboard.writeText(textToCopy);
                 
                 // コピー成功時の演出（ボタンの文字を一時的に変える）
-                copyBtn.innerText = 'コピーしました❗✌️';
+                copyBtn.innerText = 'コピーしたヨ❗😊';
                 copyBtn.style.backgroundColor = '#4CAF50'; // 緑色にする
                 
                 setTimeout(() => {
-                    copyBtn.innerText = '生成された文章をコピー📋';
+                    copyBtn.innerText = 'コピー';
                     copyBtn.style.backgroundColor = '#4a4a4a'; // 元の色に戻す
                 }, 1500);
                 
