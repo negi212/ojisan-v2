@@ -12,7 +12,14 @@
         input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background-color: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
         button:disabled { background-color: #ccc; }
-        #output { margin-top: 20px; padding: 15px; background: #fff3f3; border-left: 5px solid #ff6b6b; border-radius: 4px; white-space: pre-wrap; display: none; line-height: 1.6; }
+        
+        /* 出力エリアの囲み枠 */
+        .output-container { margin-top: 20px; display: none; }
+        #output { padding: 15px; background: #fff3f3; border-left: 5px solid #ff6b6b; border-radius: 4px 4px 0 0; white-space: pre-wrap; line-height: 1.6; }
+        
+        /* コピーボタン専用のスタイル */
+        #copyBtn { width: 100%; padding: 8px; background-color: #4a4a4a; color: white; border: none; border-radius: 0 0 4px 4px; font-size: 14px; font-weight: normal; cursor: pointer; }
+        #copyBtn:hover { background-color: #333333; }
     </style>
 </head>
 <body>
@@ -32,15 +39,21 @@
 
         <button id="generateBtn">生成</button>
 
-        <div id="output"></div>
+        <div class="output-container" id="outputContainer">
+            <div id="output"></div>
+            <button id="copyBtn">生成された文章をコピー📋</button>
+        </div>
     </div>
 
     <script>
         const userNameInput = document.getElementById('userName');
         const topicInput = document.getElementById('topic');
         const generateBtn = document.getElementById('generateBtn');
+        const outputContainer = document.getElementById('outputContainer');
         const outputDiv = document.getElementById('output');
+        const copyBtn = document.getElementById('copyBtn');
 
+        // 生成ボタンの処理
         generateBtn.addEventListener('click', async () => {
             const userName = userNameInput.value.trim();
             const topic = topicInput.value.trim();
@@ -51,11 +64,12 @@
             }
 
             generateBtn.disabled = true;
-            outputDiv.style.display = 'block';
+            // コピーボタン付きのコンテナを表示
+            outputContainer.style.display = 'block';
+            copyBtn.style.display = 'none'; // 生成中はコピーボタンを隠す
             outputDiv.innerText = '文章を考えてるヨ…🤔';
 
             try {
-                // 自作する裏方API（/api/convert）にデータを安全に送信
                 const response = await fetch('/api/convert', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -66,6 +80,7 @@
                 
                 if (response.ok) {
                     outputDiv.innerText = data.result;
+                    copyBtn.style.display = 'block'; // 成功時のみコピーボタンを表示
                 } else {
                     outputDiv.innerText = 'エラーが発生しちゃったカナ？：' + data.error;
                 }
@@ -73,6 +88,28 @@
                 outputDiv.innerText = '通信エラーだヨ😭：' + error.message;
             } finally {
                 generateBtn.disabled = false;
+            }
+        });
+
+        // コピーボタンの処理
+        copyBtn.addEventListener('click', async () => {
+            const textToCopy = outputDiv.innerText;
+            
+            try {
+                // クリップボードにテキストをコピー
+                await navigator.clipboard.writeText(textToCopy);
+                
+                // コピー成功時の演出（ボタンの文字を一時的に変える）
+                copyBtn.innerText = 'コピーしました❗✌️';
+                copyBtn.style.backgroundColor = '#4CAF50'; // 緑色にする
+                
+                setTimeout(() => {
+                    copyBtn.innerText = '生成された文章をコピー📋';
+                    copyBtn.style.backgroundColor = '#4a4a4a'; // 元の色に戻す
+                }, 1500);
+                
+            } catch (error) {
+                alert('コピーに失敗しちゃったみたい💦');
             }
         });
     </script>
